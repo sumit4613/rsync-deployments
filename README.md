@@ -21,16 +21,24 @@ This action can receive three `ARG`s:
 # Example usage
 
 ```
-workflow "All pushes" {
-  on = "push"
-  resolves = ["Deploy to Staging"]
-}
+name: Deploy to production
 
-action "Deploy to Staging" {
-  uses = "contention/action-rsync-deploy@master"
-  secrets = ["DEPLOY_KEY"]
-  args = ["-avzr --delete", "--exclude .htaccess --exclude /uploads/", "user@server.com:/srv/myapp/public/htdocs/"]
-} 
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: sumit4613/rsync-deployments@master
+        with:
+          RSYNC_OPTIONS: -avzr --delete --exclude node_modules --exclude '.git*'
+          RSYNC_TARGET: user@example.com:/path/to/target
+        env:
+          DEPLOY_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 ```
 
 ## Disclaimer
